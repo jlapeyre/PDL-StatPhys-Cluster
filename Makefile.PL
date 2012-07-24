@@ -19,3 +19,27 @@ WriteMakefile(%hash);
 
 sub MY::postamble { pdlpp_postamble($package); }
 
+my $POD_header = <<EOF;
+=head1 OVERVIEW
+
+A module for PDL providing cluster counting for 2-d,
+site, statistical models.
+This module is not on the CPAN.
+
+=cut
+
+EOF
+
+if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
+{
+  open MOD, 'Cluster.pm' or die 'Could not open main module';
+  open README, '>README.pod'              or die "Couldn't open README.pod";
+
+  print README $POD_header;
+
+  while (<MOD>)
+  {
+    if (/^=/../^=cut/)
+    { print README; }
+  }
+}
