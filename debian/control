@@ -1,0 +1,17 @@
+Source: libpdl-statphys-cluster-perl
+Section: perl
+Priority: optional
+Maintainer: John Lapeyre <jlapeyre@cpan.org>
+Build-Depends: debhelper (>= 8),
+ pdl,
+ perl,
+ perl-modules
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/PDL-StatPhys-Cluster/
+
+Package: libpdl-statphys-cluster-perl
+Architecture: any
+Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
+ pdl,
+ perl-modules
+Description: routines for cluster counting

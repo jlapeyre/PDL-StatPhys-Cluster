@@ -1,0 +1,5 @@
+libpdl-statphys-cluster-perl (0.001-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- John Lapeyre <jlapeyre@cpan.org>  Tue, 24 Jul 2012 14:25:06 +0200
