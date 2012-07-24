@@ -2,7 +2,6 @@ cluster.pd
 hk.c
 hk_types.c
 LICENSE
-Makefile.old
 Makefile.PL
 MANIFEST
 META.yml

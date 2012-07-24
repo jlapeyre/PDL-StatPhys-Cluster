@@ -8,6 +8,7 @@ pp_setversion( "'$PDL::StatPhys::Cluster::VERSION'");
 pp_add_exported('','clustdist', 'site_perc_sample');
 
 pp_addpm({At=>'Top'},<<'EOD');
+
 =head1 NAME
 
 PDL::StatPhys::Cluster - routines for cluster counting
