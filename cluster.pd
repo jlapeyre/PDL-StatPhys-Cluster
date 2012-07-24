@@ -1,0 +1,191 @@
+use strict;
+use warnings;
+use Carp;
+
+$PDL::StatPhys::Cluster::VERSION = '0.001';
+pp_setversion( "'$PDL::StatPhys::Cluster::VERSION'");
+
+pp_add_exported('','clustdist', 'site_perc_sample');
+
+pp_addpm({At=>'Top'},<<'EOD');
+=head1 NAME
+
+PDL::StatPhys::Cluster - routines for cluster counting
+
+=head1 DESCRIPTION
+
+Cluster counting, and some percolations routines. These
+routines find the clusters on a 2-d array of integers where
+a given integer represents and empty site and any other value represents an occupied
+site. Two occupied sites are in the same cluster if they are
+nearest neighbors.  The algorithm is a weighted union-find
+with path compression known as the Hoshen-Kopelman
+algorithm.
+
+See also the connected component function L<PDL::Image2D/ccNcompt>.
+
+=head1 SYNOPSIS
+
+        use PDL;
+        use PDL::StatPhys::Cluster;
+        use PDL::NiceSlice;
+        
+        $c = pdl long , [ 
+            [1,1,0,1,1],
+            [1,1,0,0,0],
+            [1,1,0,1,0],
+            [0,0,0,0,0],
+            [1,1,1,0,1],
+            [1,1,1,0,1]
+           ];
+      ($max_cluster_size, $cluster_size_distribution) = clustdist($c);
+
+=head1 FUNCTIONS
+
+=head2 clustdist()
+
+Example:
+
+=for example
+
+  ($max_cluster_size, $num_clusters, $cluster_size_distribution) = clustdist($lattice);
+
+Usage:
+
+=for usage
+
+  ($max_cluster_size, $num_clusters, $cluster_size_distribution) = clustdist($lattice, {OPTIONS} );
+
+Options:
+
+=for options
+
+  closed_site => n
+  value of a closed (unoccupied) site. All other values are considered open (occupied).
+  Default 0.
+
+=for ref
+
+Find clusters in $lattice and compute the distribution of cluster masses,
+where the mass is the number of open sites in a cluster.
+The return values are the size of the largest cluster, the number of clusters, and a 1-d pdl
+containing the cluster counts. The ith element is the number of
+clusters of mass i-1. (There are no clusters of mass zero.)
+
+=head2 site_perc_sample()
+
+Usage:
+
+=for usage
+
+  site_perc_sample($lattice, $p,  {OPTIONS} );
+
+Options:
+
+=for options
+
+  open_site => n
+  value of an open (occupied) site.  closed (unoccupied) sites have value zero.
+  Default 1. If the lattice is a piddle of bytes, you could set this to 255 for
+  instance so that occupied sites are represented by white in an image.
+
+=for ref
+
+Sample a site percolation process with site density $p. This routine is simple and short
+and uses the builtin perl RNG via PDL. A temporary piddle of doubles with the same dimensions
+as $lattice is created. The input piddle can have any shape. Each element of $lattice is set
+to open_site with probability $p and to 0 with probability 1-$p.
+
+Example:
+
+=for example
+
+    $lattice = byte zeroes(300,300);
+    site_perc_sample($lattice, .5926);
+    
+=head1 CONSTANTS
+
+=head2 PDL::Cluster::SITE_PERC_2D_PC
+
+The threshold for site percolation on a 2d square lattice. 0.5927462
+
+=cut
+
+use PDL;
+use PDL::Options;
+
+# 
+use constant {
+   SITE_PERC_2D_PC => 0.5927462
+};
+
+sub clustdist {
+    my ($sites, $iopts) = @_;
+    my $opt = new PDL::Options({ closed_site => 0});
+    $iopts = {} unless defined $iopts;                                 
+    my $opts = $opt->options($iopts);
+    my @dims = $sites->dims;
+    my ($maxc, $numc, $dist) = _clust_dist($sites->clump(2),$dims[0],$dims[1],
+         $opts->{closed_site});
+    return ($maxc, $numc, $dist);
+}
+
+sub site_perc_sample {
+    my ($lattice, $p,$iopts) = @_;
+    $iopts = {} unless defined $iopts;
+    my $opt = new PDL::Options({ open_site => 1});
+    my $opts = $opt->options($iopts);
+    my @dims = $lattice->dims;
+    my $nums = random(@dims);
+    if ( $opts->{open_site} == 1 ) {
+        $lattice .=  ($nums < $p);
+    }
+    else {
+        $lattice .=  ($opts->{open_site}) * ($nums < $p);
+    }
+}
+
+
+EOD
+
+pp_addhdr('
+#include "hk.c"
+');
+
+pp_def("_clust_dist",
+  	Pars => 'sites(nm); int n(); int m(); closedval();
+                int [o] max_c(); int [o] num_c(); int [o]dist(nm);',
+      GenericTypes => [qw(L B D)],
+      Code => '
+              $TLBD(hk_clusters_tally_int, hk_clusters_tally_char, hk_clusters_tally_double) 
+              ($P(sites), $P(dist), $n(), $m(), $closedval(), $P(max_c), $P(num_c));',
+      Doc=>undef
+   );
+
+pp_addpm(<<'ENDPM');
+
+1; # OK
+
+ENDPM
+
+pp_addpm(<<'EOD');
+
+=head1 BUGS
+
+None known.
+
+=head1 AUTHOR
+
+This file copyright (C) 2012, John Lapeyre (jlapeyre@cpan.org), 
+All rights reserved. There is no warranty. You are allowed
+to redistribute this software / documentation under certain
+conditions. For details, see the file COPYING in the PDL
+distribution. If this file is separated from the PDL
+distribution, the copyright notice should be included in the
+file.
+
+=cut
+
+EOD
+
+pp_done();
