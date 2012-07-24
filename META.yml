@@ -1,24 +1,23 @@
----
-abstract: 'routines for cluster counting'
+--- #YAML:1.0
+name:               PDL-StatPhys-Cluster
+version:            0.001
+abstract:           routines for cluster counting
 author:
-  - 'John Lapeyre <jlapeyre@cpan.org>'
-build_requires:
-  ExtUtils::MakeMaker: 0
+    - John Lapeyre <jlapeyre@cpan.org>
+license:            perl
+distribution_type:  module
 configure_requires:
-  ExtUtils::MakeMaker: 0
-distribution_type: module
-dynamic_config: 0
-generated_by: 'ExtUtils::MakeMaker version 6.57_05'
-license: perl
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
-name: PDL-StatPhys-Cluster
-no_index:
-  directory:
-    - t
-    - inc
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
 requires:
-  PDL: 0
-  Test::More: 0
-version: 0.001
+    PDL:         0
+    Test::More:  0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.57_05
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
